@@ -13,7 +13,7 @@ public class CrossOrogin implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Allow all paths
-                .allowedOrigins("http://localhost:5173","https://csfreshersparty.vercel.app/") // Replace with your React app's URL
+                .allowedOrigins("http://ec2-3-104-54-235.ap-southeast-2.compute.amazonaws.com","http://localhost:5173","https://csfreshersparty.vercel.app/") // Replace with your React app's URL
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow methods
                 .allowCredentials(false); // If you need to send cookies
     }
