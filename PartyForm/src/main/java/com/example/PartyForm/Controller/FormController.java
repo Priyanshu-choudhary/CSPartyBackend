@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -25,10 +26,16 @@ public class FormController {
 
     @PostMapping("/submit")
     public ResponseEntity<String> submitForm(@RequestBody Form formData) {
+        // Check if email already exists
+        if (formDataRepository.existsByEmail(formData.getEmail())) {
+            // If email exists, return 409 Conflict status
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists!");
+        }
+
+        // If email is not duplicate, save the form data
         formDataRepository.save(formData);
         return ResponseEntity.ok("Form submitted successfully!");
     }
-
     @GetMapping("/submissions/download")
     public ResponseEntity<byte[]> downloadSubmissionsAsCSV() {
         List<Form> submissions = formDataRepository.findAll();
