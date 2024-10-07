@@ -15,6 +15,6 @@ public class CrossOrogin implements WebMvcConfigurer {
         registry.addMapping("/**") // Allow all paths
                 .allowedOrigins("http://localhost:5173","https://csfreshersparty.vercel.app/") // Replace with your React app's URL
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow methods
-                .allowCredentials(true); // If you need to send cookies
+                .allowCredentials(false); // If you need to send cookies
     }
 }

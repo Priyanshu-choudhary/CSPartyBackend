@@ -60,4 +60,11 @@ public class FormController {
 
         return new ResponseEntity<>(data, headers, HttpStatus.OK);
     }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List> getAllData() {
+        List<Form> submissions = formDataRepository.findAll();
+
+        return new ResponseEntity<>(submissions,  HttpStatus.OK);
+    }
 }
