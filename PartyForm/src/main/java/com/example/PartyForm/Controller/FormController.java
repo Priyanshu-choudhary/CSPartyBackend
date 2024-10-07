@@ -1,21 +1,21 @@
 package com.example.PartyForm.Controller;
 
 import com.example.PartyForm.Model.Form;
+import com.example.PartyForm.QR.EmailService;
 import com.example.PartyForm.Repo.FormRepo;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
  // Allow CORS from all origins or specify your front-end URL
@@ -23,7 +23,8 @@ public class FormController {
 
     @Autowired
     private FormRepo formDataRepository;
-
+    @Autowired
+    private EmailService emailService;
     @PostMapping("/submit")
     public ResponseEntity<String> submitForm(@RequestBody Form formData) {
         // Check if email already exists
@@ -33,7 +34,13 @@ public class FormController {
         }
 
         // If email is not duplicate, save the form data
-        formDataRepository.save(formData);
+
+        try {
+            emailService.sendRegistrationEmail(formData);
+            formDataRepository.save(formData);// Send invitation email with QR code
+        } catch (MessagingException | IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error sending email");
+        }
         return ResponseEntity.ok("Form submitted successfully!");
     }
     @GetMapping("/submissions/download")
@@ -73,5 +80,18 @@ public class FormController {
         List<Form> submissions = formDataRepository.findAll();
 
         return new ResponseEntity<>(submissions,  HttpStatus.OK);
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteFormById(@PathVariable("id") String id) {
+        // Check if the form data exists by id
+        Optional<Form> formData = formDataRepository.findById(id);
+
+        if (formData.isPresent()) {
+            formDataRepository.deleteById(id); // Delete form data by id
+            return new ResponseEntity<>("Form data deleted successfully", HttpStatus.OK);
+        } else {
+            // If the form data with the specified id doesn't exist, return 404
+            return new ResponseEntity<>("Form data not found", HttpStatus.NOT_FOUND);
+        }
     }
 }
